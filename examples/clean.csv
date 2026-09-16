@@ -1,0 +1,3 @@
+order_id,customer,amount,status,paid
+ORD-001,张三,128.50,paid,true
+ORD-002,李四,20,pending,false

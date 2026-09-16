@@ -1,0 +1,10 @@
+{
+  "delimiter": ",",
+  "columns": [
+    {"column":"order_id", "required":true, "unique":true},
+    {"column":"customer", "required":true},
+    {"column":"amount", "type":"number", "required":true, "min":0, "max":100000},
+    {"column":"status", "enum":["paid","pending","cancelled"]},
+    {"column":"paid", "type":"boolean"}
+  ]
+}
