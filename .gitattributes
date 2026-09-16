@@ -1,0 +1,5 @@
+* text=auto
+*.mbt text eol=lf
+*.mjs text eol=lf
+*.js text eol=lf
+web/core.js linguist-generated=true

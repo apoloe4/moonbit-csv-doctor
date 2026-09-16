@@ -1,0 +1,7 @@
+import {
+  "moonbitlang/core/json",
+}
+
+options(
+  link: { "js": { "exports": [ "analyze" ], "format": "esm" } },
+)
