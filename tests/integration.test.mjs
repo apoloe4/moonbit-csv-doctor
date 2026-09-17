@@ -57,3 +57,16 @@ test('20,000 rows: deterministic duplicate counts',()=>{
   const r=inspect(csv,{columns:[{column:'id',unique:true},{column:'value',type:'number',min:0}]});
   assert.equal(r.rows,20000);assert.equal(r.failedRows,10000);assert.equal(r.issueCount,10000);
 });
+
+test('CLI preserves CSV BOM byte offsets while accepting BOM-prefixed rule JSON',()=>{
+  const dir=mkdtempSync(join(tmpdir(),'csv-doctor-bom-'));
+  try {
+    const csv=join(dir,'source.csv'),rules=join(dir,'rules.json');
+    const source='\uFEFFid,n\r\n😀,bad\r\n';
+    writeFileSync(csv,source);writeFileSync(rules,'\uFEFF'+JSON.stringify({columns:[{column:'n',type:'integer'}]}));
+    const result=run(csv,'--rules',rules);assert.equal(result.status,1);
+    const span=JSON.parse(result.stdout).issues[0].span;
+    assert.equal(span.startByte,Buffer.byteLength(source.slice(0,source.indexOf('bad'))));
+    assert.equal(span.startUtf16,source.indexOf('bad'));
+  } finally {rmSync(dir,{recursive:true,force:true});}
+});
