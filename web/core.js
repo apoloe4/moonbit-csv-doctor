@@ -402,9 +402,20 @@ function _M0DTPC14json10WriteFrame6Object(param0, param1) {
   this._1 = param1;
 }
 _M0DTPC14json10WriteFrame6Object.prototype.$tag = 1;
-function _M0TP212csv_2ddoctor4core6Record(param0, param1) {
+function _M0TP212csv_2ddoctor4core10SourceSpan(param0, param1, param2, param3, param4, param5, param6, param7) {
+  this.startUtf16 = param0;
+  this.endUtf16 = param1;
+  this.startByte = param2;
+  this.endByte = param3;
+  this.startLine = param4;
+  this.startColumn = param5;
+  this.endLine = param6;
+  this.endColumn = param7;
+}
+function _M0TP212csv_2ddoctor4core6Record(param0, param1, param2) {
   this.cells = param0;
-  this.line = param1;
+  this.spans = param1;
+  this.line = param2;
 }
 function _M0DTPC16result6ResultGRPB5ArrayGRP212csv_2ddoctor4core6RecordERP212csv_2ddoctor4core11DoctorErrorE3Err(param0) {
   this._0 = param0;
@@ -475,13 +486,14 @@ function _M0DTPC16result6ResultGURPB5ArrayGRP212csv_2ddoctor4core4RuleEcERPC15er
   this._0 = param0;
 }
 _M0DTPC16result6ResultGURPB5ArrayGRP212csv_2ddoctor4core4RuleEcERPC15error5ErrorE2Ok.prototype.$tag = 1;
-function _M0TP212csv_2ddoctor4core5Issue(param0, param1, param2, param3, param4, param5) {
+function _M0TP212csv_2ddoctor4core5Issue(param0, param1, param2, param3, param4, param5, param6) {
   this.row = param0;
   this.line = param1;
   this.column = param2;
   this.code = param3;
   this.value = param4;
   this.message = param5;
+  this.span = param6;
 }
 function _M0DTPC16result6ResultGRPB4JsonRP212csv_2ddoctor4core11DoctorErrorE3Err(param0) {
   this._0 = param0;
@@ -630,6 +642,9 @@ const _M0FPC28internal7strconv12checked__mulN6constrS1163 = 0n;
 const _M0FPC14json17int__pow10__table = [1n, 10n, 100n, 1000n, 10000n, 100000n, 1000000n, 10000000n, 100000000n, 1000000000n, 10000000000n, 100000000000n, 1000000000000n, 10000000000000n, 100000000000000n, 1000000000000000n];
 const _M0FPC14json12pow10__table = [1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000, 1e+012, 1e+013, 1e+014, 1e+015, 1e+016, 1e+017, 1e+018, 1e+019, 1e+020, 1e+021, 1e+022, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 const _M0FPC14json12checked__mulN6constrS1890 = 0n;
+const _M0FP212csv_2ddoctor4core13inspect__dataN7_2abindS262 = "";
+const _M0FP212csv_2ddoctor4core13inspect__dataN7_2abindS264 = "column_count";
+const _M0FP212csv_2ddoctor4core13inspect__dataN7_2abindS265 = "";
 const _M0FPB4seed = _M0FPB12random__seed();
 const _M0FPC28internal7strconv17check__underscoreN25_2atransition__table__222S230 = [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 5, 5, 5, 5, 5, 0, 1, 2, 5];
 const _M0FPC28internal7strconv15parse__inf__nanN25_2atransition__table__304S312 = [14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 3, 4, 14, 14, 14, 14, 14, 14, 14, 7, 14, 14, 14, 14, 5, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 6, 14, 14, 14, 0, 14, 14, 14, 14, 14, 14, 14, 14, 14, 8, 14, 14, 14, 14, 14, 1, 14, 14, 9, 14, 14, 14, 14, 14, 14, 14, 14, 10, 14, 14, 14, 14, 14, 14, 11, 14, 14, 14, 14, 14, 14, 14, 14, 14, 12, 14, 14, 14, 14, 14, 14, 14, 14, 13, 14, 1, 14, 14, 14, 14, 14, 14, 14];
@@ -6197,33 +6212,64 @@ function _M0MPC14json4Json17stringify_2einner(self, escape_slash, indent, replac
   }
   return buf.val;
 }
-function _M0IP212csv_2ddoctor4core5IssuePB6ToJson8to__json(_x_96) {
+function _M0IP212csv_2ddoctor4core5IssuePB6ToJson8to__json(_x_116) {
   const _bind = [];
   const $36$map = _M0MPB3Map3MapGsRPB4JsonE(new _M0TPB9ArrayViewGUsRPB4JsonEE(_bind, 0, 0), undefined);
-  _M0MPB3Map3setGsRPB4JsonE($36$map, "row", _M0IPC13int3IntPB6ToJson8to__json(_x_96.row));
-  _M0MPB3Map3setGsRPB4JsonE($36$map, "line", _M0IPC13int3IntPB6ToJson8to__json(_x_96.line));
-  const _p = _x_96.column;
+  _M0MPB3Map3setGsRPB4JsonE($36$map, "row", _M0IPC13int3IntPB6ToJson8to__json(_x_116.row));
+  _M0MPB3Map3setGsRPB4JsonE($36$map, "line", _M0IPC13int3IntPB6ToJson8to__json(_x_116.line));
+  const _p = _x_116.column;
   _M0MPB3Map3setGsRPB4JsonE($36$map, "column", new _M0DTPB4Json6String(_p));
-  const _p$2 = _x_96.code;
+  const _p$2 = _x_116.code;
   _M0MPB3Map3setGsRPB4JsonE($36$map, "code", new _M0DTPB4Json6String(_p$2));
-  const _p$3 = _x_96.value;
+  const _p$3 = _x_116.value;
   _M0MPB3Map3setGsRPB4JsonE($36$map, "value", new _M0DTPB4Json6String(_p$3));
-  const _p$4 = _x_96.message;
+  const _p$4 = _x_116.message;
   _M0MPB3Map3setGsRPB4JsonE($36$map, "message", new _M0DTPB4Json6String(_p$4));
+  const _bind$2 = _x_116.span;
+  if (_bind$2 === undefined) {
+  } else {
+    const _Some = _bind$2;
+    const _$36$inner = _Some;
+    _M0MPB3Map3setGsRPB4JsonE($36$map, "span", _M0IP212csv_2ddoctor4core10SourceSpanPB6ToJson8to__json(_$36$inner));
+  }
+  return new _M0DTPB4Json6Object($36$map);
+}
+function _M0IP212csv_2ddoctor4core10SourceSpanPB6ToJson8to__json(_x_105) {
+  const _bind = [];
+  const $36$map = _M0MPB3Map3MapGsRPB4JsonE(new _M0TPB9ArrayViewGUsRPB4JsonEE(_bind, 0, 0), undefined);
+  _M0MPB3Map3setGsRPB4JsonE($36$map, "startUtf16", _M0IPC13int3IntPB6ToJson8to__json(_x_105.startUtf16));
+  _M0MPB3Map3setGsRPB4JsonE($36$map, "endUtf16", _M0IPC13int3IntPB6ToJson8to__json(_x_105.endUtf16));
+  _M0MPB3Map3setGsRPB4JsonE($36$map, "startByte", _M0IPC13int3IntPB6ToJson8to__json(_x_105.startByte));
+  _M0MPB3Map3setGsRPB4JsonE($36$map, "endByte", _M0IPC13int3IntPB6ToJson8to__json(_x_105.endByte));
+  _M0MPB3Map3setGsRPB4JsonE($36$map, "startLine", _M0IPC13int3IntPB6ToJson8to__json(_x_105.startLine));
+  _M0MPB3Map3setGsRPB4JsonE($36$map, "startColumn", _M0IPC13int3IntPB6ToJson8to__json(_x_105.startColumn));
+  _M0MPB3Map3setGsRPB4JsonE($36$map, "endLine", _M0IPC13int3IntPB6ToJson8to__json(_x_105.endLine));
+  _M0MPB3Map3setGsRPB4JsonE($36$map, "endColumn", _M0IPC13int3IntPB6ToJson8to__json(_x_105.endColumn));
   return new _M0DTPB4Json6Object($36$map);
 }
 function _M0FP212csv_2ddoctor4core10parse__csv(text, delimiter) {
   const chars = _M0MPB4Iter9to__arrayGcE(_M0MPC16string6String4iter(text));
   const records = [];
   let cells = [];
+  let spans = [];
   const field = _M0MPB13StringBuilder21StringBuilder_2einner(0);
   let i = chars.length > 0 && _M0MPC15array5Array2atGcE(chars, 0) === 65279 ? 1 : 0;
+  let u16 = i;
+  let bytes = Math.imul(i, 3) | 0;
+  let source_line = 1;
+  let source_column = 1;
+  let field_u16 = u16;
+  let field_bytes = bytes;
+  let field_line = 1;
+  let field_column = 1;
   let line = 1;
   let start = 1;
   let state = 0;
   let touched = false;
   while (true) {
     if (i < chars.length) {
+      const before = i;
+      let next_field = false;
       const c = _M0MPC15array5Array2atGcE(chars, i);
       if (state === 1) {
         if (c === 34) {
@@ -6249,15 +6295,20 @@ function _M0FP212csv_2ddoctor4core10parse__csv(text, delimiter) {
         }
       } else {
         if (c === delimiter) {
+          _M0MPC15array5Array4pushGRPC14json10WriteFrameE(spans, new _M0TP212csv_2ddoctor4core10SourceSpan(field_u16, u16, field_bytes, bytes, field_line, field_column, source_line, source_column));
+          next_field = true;
           _M0MPC15array5Array4pushGRPC14json10WriteFrameE(cells, field.val);
           _M0MPB13StringBuilder5reset(field);
           state = 0;
           touched = true;
         } else {
           if (c === 13 || c === 10) {
+            _M0MPC15array5Array4pushGRPC14json10WriteFrameE(spans, new _M0TP212csv_2ddoctor4core10SourceSpan(field_u16, u16, field_bytes, bytes, field_line, field_column, source_line, source_column));
+            next_field = true;
             _M0MPC15array5Array4pushGRPC14json10WriteFrameE(cells, field.val);
-            _M0MPC15array5Array4pushGRPC14json10WriteFrameE(records, new _M0TP212csv_2ddoctor4core6Record(cells, start));
+            _M0MPC15array5Array4pushGRPC14json10WriteFrameE(records, new _M0TP212csv_2ddoctor4core6Record(cells, spans, start));
             cells = [];
+            spans = [];
             _M0MPB13StringBuilder5reset(field);
             state = 0;
             touched = false;
@@ -6292,6 +6343,38 @@ function _M0FP212csv_2ddoctor4core10parse__csv(text, delimiter) {
           }
         }
       }
+      let _tmp = before;
+      while (true) {
+        const j = _tmp;
+        if (j <= i) {
+          const cp = _M0MPC15array5Array2atGcE(chars, j);
+          u16 = u16 + (cp > 65535 ? 2 : 1) | 0;
+          bytes = bytes + (cp <= 127 ? 1 : cp <= 2047 ? 2 : cp <= 65535 ? 3 : 4) | 0;
+          if (_M0MPC15array5Array2atGcE(chars, j) === 13) {
+            source_line = source_line + 1 | 0;
+            source_column = 1;
+          } else {
+            if (_M0MPC15array5Array2atGcE(chars, j) === 10) {
+              if (j === 0 || _M0MPC15array5Array2atGcE(chars, j - 1 | 0) !== 13) {
+                source_line = source_line + 1 | 0;
+              }
+              source_column = 1;
+            } else {
+              source_column = source_column + 1 | 0;
+            }
+          }
+          _tmp = j + 1 | 0;
+          continue;
+        } else {
+          break;
+        }
+      }
+      if (next_field) {
+        field_u16 = u16;
+        field_bytes = bytes;
+        field_line = source_line;
+        field_column = source_column;
+      }
       i = i + 1 | 0;
       continue;
     } else {
@@ -6306,8 +6389,9 @@ function _M0FP212csv_2ddoctor4core10parse__csv(text, delimiter) {
     return new _M0DTPC16result6ResultGRPB5ArrayGRP212csv_2ddoctor4core6RecordERP212csv_2ddoctor4core11DoctorErrorE3Err(new _M0DTPC15error5Error43csv_2ddoctor_2fcore_2eDoctorError_2eInvalid(_string_builder.val));
   }
   if (touched || cells.length > 0) {
+    _M0MPC15array5Array4pushGRPC14json10WriteFrameE(spans, new _M0TP212csv_2ddoctor4core10SourceSpan(field_u16, u16, field_bytes, bytes, field_line, field_column, source_line, source_column));
     _M0MPC15array5Array4pushGRPC14json10WriteFrameE(cells, field.val);
-    _M0MPC15array5Array4pushGRPC14json10WriteFrameE(records, new _M0TP212csv_2ddoctor4core6Record(cells, start));
+    _M0MPC15array5Array4pushGRPC14json10WriteFrameE(records, new _M0TP212csv_2ddoctor4core6Record(cells, spans, start));
   }
   return new _M0DTPC16result6ResultGRPB5ArrayGRP212csv_2ddoctor4core6RecordERP212csv_2ddoctor4core11DoctorErrorE2Ok(records);
 }
@@ -6676,13 +6760,17 @@ function _M0FP212csv_2ddoctor4core16integer__literal(value) {
   return true;
 }
 function _M0FP212csv_2ddoctor4core13inspect__dataN3addS31(_env, code, message) {
-  const value = _env._5;
-  const issues = _env._4;
-  const ri = _env._3;
-  const failed = _env._2;
+  const value = _env._6;
+  const issues = _env._5;
+  const ri = _env._4;
+  const failed = _env._3;
+  const ci = _env._2;
   const record = _env._1;
   const rule = _env._0;
-  _M0MPC15array5Array4pushGRPC14json10WriteFrameE(issues, new _M0TP212csv_2ddoctor4core5Issue(ri, record.line, rule.column, code, value, message));
+  const _bind = record.line;
+  const _bind$2 = ci < record.spans.length ? _M0MPC15array5Array2atGRPB4JsonE(record.spans, ci) : undefined;
+  const _bind$3 = rule.column;
+  _M0MPC15array5Array4pushGRPC14json10WriteFrameE(issues, new _M0TP212csv_2ddoctor4core5Issue(ri, _bind, _bind$3, code, value, message, _bind$2));
   _M0MPB3Map3setGibE(failed, ri, true);
 }
 function _M0FP212csv_2ddoctor4core13inspect__data(text, config) {
@@ -6781,14 +6869,16 @@ function _M0FP212csv_2ddoctor4core13inspect__data(text, config) {
       const record = _M0MPC15array5Array2atGRPB4JsonE(records, ri);
       total = total + 1 | 0;
       if (record.cells.length !== headers.length) {
-        const _tmp$5 = record.line;
+        const _bind$8 = record.line;
+        const _bind$9 = undefined;
         const _string_builder = _M0MPB13StringBuilder21StringBuilder_2einner(25);
         _M0IPB13StringBuilderPB6Logger13write__string(_string_builder, "应有 ");
         _M0MPB13StringBuilder13write__objectGiE(_string_builder, headers.length);
         _M0IPB13StringBuilderPB6Logger13write__string(_string_builder, " 列，实际 ");
         _M0MPB13StringBuilder13write__objectGiE(_string_builder, record.cells.length);
         _M0IPB13StringBuilderPB6Logger13write__string(_string_builder, " 列");
-        _M0MPC15array5Array4pushGRPC14json10WriteFrameE(issues, new _M0TP212csv_2ddoctor4core5Issue(ri, _tmp$5, "", "column_count", "", _string_builder.val));
+        const _bind$10 = _string_builder.val;
+        _M0MPC15array5Array4pushGRPC14json10WriteFrameE(issues, new _M0TP212csv_2ddoctor4core5Issue(ri, _bind$8, _M0FP212csv_2ddoctor4core13inspect__dataN7_2abindS262, _M0FP212csv_2ddoctor4core13inspect__dataN7_2abindS264, _M0FP212csv_2ddoctor4core13inspect__dataN7_2abindS265, _bind$10, _bind$9));
         _M0MPB3Map3setGibE(failed, ri, true);
       }
       let _tmp$5 = 0;
@@ -6813,7 +6903,7 @@ function _M0FP212csv_2ddoctor4core13inspect__data(text, config) {
           _L: {
             const ci = _M0MPB3Map2atGsiE(header_map, rule.column);
             const value = ci < record.cells.length ? _M0MPC15array5Array2atGRPB4JsonE(record.cells, ci) : "";
-            const _env = { _0: rule, _1: record, _2: failed, _3: ri, _4: issues, _5: value };
+            const _env = { _0: rule, _1: record, _2: ci, _3: failed, _4: ri, _5: issues, _6: value };
             if (_M0MPC16string6String9is__blank(value)) {
               if (rule.required) {
                 _M0FP212csv_2ddoctor4core13inspect__dataN3addS31(_env, "required", "必填值为空");

@@ -1,30 +1,34 @@
+import {mountRepair} from './repair-ui.js';
 import {reportHTML, escapeHTML as e} from './report.js';
 import {mountRuleBuilder} from './rule-builder.js';
 const $ = id=>document.getElementById(id);
 const sampleCSV = 'order_id,customer,amount,status,paid\nORD-001,张三,128.50,paid,true\nORD-002,李四,-20,pending,false\nORD-001,王五,99,unknown,true\nORD-004,,abc,paid,yes\nORD-005,"赵六,公司",350,paid,true\nORD-006,"跨行\n客户",240,pending,false\n';
 const sampleRules = {delimiter:',',columns:[{column:'order_id',required:true,unique:true},{column:'customer',required:true},{column:'amount',type:'number',required:true,min:0,max:100000},{column:'status',enum:['paid','pending','cancelled']},{column:'paid',type:'boolean'}]};
-let report, filename='粘贴的数据.csv', worker, serial=0;
+let source='', report, filename='粘贴的数据.csv', worker, serial=0;
 const notice = (text,kind='') => {$('notice').textContent=text;$('notice').className='notice '+kind;};
+const repair = mountRepair({getSource:()=>source,getRules:()=>$('rules').value,
+  setSource:text=>{source=text;$('csv').value=text;run();},notice,download});
 function invalidate() {
+  repair.invalidate();
   serial++; worker?.terminate(); worker=null;
   report=null;$('run').disabled=false;$('run').innerHTML='开始体检 <span>→</span>';
   $('export-json').disabled=true;$('export-html').disabled=true;
   $('report').hidden=true;$('empty').hidden=false;
   notice('数据或规则已更新，请重新体检。');
 }
-$('csv').addEventListener('input',()=>{filename='粘贴的数据.csv';$('filename').textContent=filename;invalidate();});
+$('csv').addEventListener('input',()=>{source=$('csv').value;repair.reset(source);filename='粘贴的数据.csv';$('filename').textContent=filename;invalidate();});
 $('rules').addEventListener('input',invalidate);
 mountRuleBuilder($('rules'), invalidate);
 $('reset').onclick=()=>{$('rules').value='{"columns":[]}';invalidate();};
-$('sample').onclick=()=>{$('csv').value=sampleCSV;$('rules').value=JSON.stringify(sampleRules,null,2);filename='示例订单.csv';$('filename').textContent=filename;invalidate();run();};
+$('sample').onclick=()=>{source=sampleCSV;repair.reset(source);$('csv').value=sampleCSV;$('rules').value=JSON.stringify(sampleRules,null,2);filename='示例订单.csv';$('filename').textContent=filename;invalidate();run();};
 async function loadFile(file) {
   if(!file) return;
   invalidate(); const ticket=serial;
   try {
     if(file.size>10*1024*1024) throw Error('文件超过 10 MiB，请先拆分文件。');
-    const text = new TextDecoder('utf-8',{fatal:true}).decode(await file.arrayBuffer());
+    const text = new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(await file.arrayBuffer());
     if(ticket!==serial)return;
-    $('csv').value=text;filename=file.name;$('filename').textContent=`${file.name} · ${(file.size/1024).toFixed(1)} KiB`;
+    source=text;repair.reset(source);$('csv').value=text;filename=file.name;$('filename').textContent=`${file.name} · ${(file.size/1024).toFixed(1)} KiB`;
     notice('文件已载入，请配置规则并开始体检。');
   }catch(err){if(ticket===serial)notice('无法读取文件：'+err.message,'error');}
 }
@@ -32,7 +36,7 @@ $('file').onchange=ev=>loadFile(ev.target.files[0]);
 for(const event of ['dragover','dragleave','drop']) $('drop').addEventListener(event,ev=>{ev.preventDefault();$('drop').classList.toggle('over',event==='dragover');if(event==='drop')loadFile(ev.dataTransfer.files[0]);});
 function run() {
   invalidate();
-  const csv=$('csv').value,rules=$('rules').value;
+  const csv=source,rules=$('rules').value;
   if(new TextEncoder().encode(csv).length>10*1024*1024 || new TextEncoder().encode(rules).length>1024*1024){notice('CSV 最大 10 MiB，规则最大 1 MiB。','error');return;}
   $('run').disabled=true;$('run').textContent='正在体检…';notice('MoonBit 引擎正在检查数据…');
   const id=serial;
@@ -59,10 +63,12 @@ function render() {
 function renderIssues(){
   if(!report)return;
   const list=report.issues.filter(i=>$('filter').value==='all'||i.code===$('filter').value);
-  $('issue-list').innerHTML=list.slice(0,200).map(i=>`<tr><td>${i.line}</td><td><strong>${e(i.column||'整行')}</strong><code>${e(i.value||'（空）')}</code></td><td><span class="pill">${e(i.code)}</span>${e(i.message)}</td></tr>`).join('')||'<tr><td colspan="3">当前筛选下没有问题。</td></tr>';
-  $('table-note').textContent=`共 ${list.length} 条${list.length>200?'，页面展示前 200 条，导出包含全部结果':''}。行号对应记录在原文件中的起始行。`;
+  $('issue-list').innerHTML=list.slice(0,200).map(i=>`<tr><td>${i.span?`${i.span.startLine}:${i.span.startColumn}`:i.line}<br>${i.span?`<button class="text-button" data-issue="${report.issues.indexOf(i)}">定位 / 修复</button>`:''}</td><td><strong>${e(i.column||'整行')}</strong><code>${e(i.value||'（空）')}</code></td><td><span class="pill">${e(i.code)}</span>${e(i.message)}</td></tr>`).join('')||'<tr><td colspan="3">当前筛选下没有问题。</td></tr>';
+  $('table-note').textContent=`共 ${list.length} 条${list.length>200?'，页面展示前 200 条，导出包含全部结果':''}。位置为字段起始行:列；无字段范围的结构问题显示记录起始行。`;
 }
 $('filter').onchange=renderIssues;
-function download(content,type,suffix){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=filename.replace(/\.[^.]+$/,'')+'-report.'+suffix;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function download(content,type,suffix){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=filename.replace(/\.[^.]+$/,'')+(suffix.includes('.')?'-'+suffix:'-report.'+suffix);a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 $('export-json').onclick=()=>report&&download(JSON.stringify(report,null,2),'application/json','json');
 $('export-html').onclick=()=>report&&download(reportHTML(report,filename),'text/html','html');
+
+$('issue-list').onclick=event=>{const button=event.target.closest('[data-issue]');if(button && report)repair.select(report.issues[Number(button.dataset.issue)]);};
