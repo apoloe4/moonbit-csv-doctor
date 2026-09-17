@@ -128,3 +128,27 @@ test "duplicate diagnostic uses physical multiline position" {
     _ => fail(report.stringify())
   }
 }
+
+///|
+test "integer validation does not accept rounded decimals or underflow" {
+  let config = "{\"columns\":[{\"column\":\"n\",\"type\":\"integer\"}]}"
+  for
+    value in [
+      "1.0000000000000001", "1e-999", "1.0", "1e3", "9007199254740992", "-9007199254740992",
+      "01", "+1",
+    ] {
+    match inspect_data("n\n" + value, config) {
+      { "status": "fail", "failedRows": 1, .. } => ()
+      _ => fail("must reject " + value)
+    }
+  }
+  for
+    value in [
+      "0", "-0", "42", "-42", "9007199254740991", "-9007199254740991", " 12 ",
+    ] {
+    match inspect_data("n\n" + value, config) {
+      { "status": "pass", .. } => ()
+      _ => fail("must accept " + value)
+    }
+  }
+}

@@ -250,6 +250,26 @@ fn numeric(value : String) -> Double? {
 }
 
 ///|
+// Check lexical integer syntax before converting to Double: values such as
+// 1.0000000000000001 and 1e-999 can otherwise round to an integer.
+fn integer_literal(value : String) -> Bool {
+  let chars = value.trim().to_owned().iter().to_array()
+  let start = if chars.length() > 0 && chars[0] == '-' { 1 } else { 0 }
+  if start == chars.length() {
+    return false
+  }
+  if chars.length() - start > 1 && chars[start] == '0' {
+    return false
+  }
+  for i = start; i < chars.length(); i = i + 1 {
+    if chars[i] < '0' || chars[i] > '9' {
+      return false
+    }
+  }
+  true
+}
+
+///|
 fn inspect_data(text : String, config : String) -> Json raise {
   let (rules, delimiter) = decode_rules(config)
   let records = parse_csv(text, delimiter)
@@ -321,9 +341,9 @@ fn inspect_data(text : String, config : String) -> Json raise {
           None => add("type", "应为 \{rule.kind}，使用 JSON 数值格式")
           Some(n) => {
             if rule.kind == "integer" &&
-              (n.floor() != n || n.abs() > 9007199254740991.0) {
+              (!integer_literal(value) || n.abs() > 9007199254740991.0) {
               add(
-                "type", "应为安全整数（绝对值不超过 9007199254740991）",
+                "type", "应为十进制安全整数，不接受小数或指数（绝对值不超过 9007199254740991）",
               )
             }
             match rule.min {
