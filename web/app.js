@@ -1,4 +1,5 @@
 import {reportHTML, escapeHTML as e} from './report.js';
+import {mountRuleBuilder} from './rule-builder.js';
 const $ = id=>document.getElementById(id);
 const sampleCSV = 'order_id,customer,amount,status,paid\nORD-001,张三,128.50,paid,true\nORD-002,李四,-20,pending,false\nORD-001,王五,99,unknown,true\nORD-004,,abc,paid,yes\nORD-005,"赵六,公司",350,paid,true\nORD-006,"跨行\n客户",240,pending,false\n';
 const sampleRules = {delimiter:',',columns:[{column:'order_id',required:true,unique:true},{column:'customer',required:true},{column:'amount',type:'number',required:true,min:0,max:100000},{column:'status',enum:['paid','pending','cancelled']},{column:'paid',type:'boolean'}]};
@@ -13,6 +14,7 @@ function invalidate() {
 }
 $('csv').addEventListener('input',()=>{filename='粘贴的数据.csv';$('filename').textContent=filename;invalidate();});
 $('rules').addEventListener('input',invalidate);
+mountRuleBuilder($('rules'), invalidate);
 $('reset').onclick=()=>{$('rules').value='{"columns":[]}';invalidate();};
 $('sample').onclick=()=>{$('csv').value=sampleCSV;$('rules').value=JSON.stringify(sampleRules,null,2);filename='示例订单.csv';$('filename').textContent=filename;invalidate();run();};
 async function loadFile(file) {
