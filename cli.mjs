@@ -29,12 +29,12 @@ function main() {
   const canonical = p => process.platform === 'win32' ? p.toLowerCase() : p;
   const sourceSet = new Set(sources.map(canonical));
   if(destinations.some(p=>sourceSet.has(canonical(p))) || new Set(destinations.map(canonical)).size !== destinations.length) throw new Error('Report paths must be distinct from inputs and each other');
-  const read = path => {
+  const read = (path, preserveBom = false) => {
     const bytes = readFileSync(path);
     if(bytes.length > 10*1024*1024) throw new Error('File exceeds the 10 MiB limit');
-    return new TextDecoder('utf-8', {fatal:true}).decode(bytes);
+    return new TextDecoder('utf-8', {fatal:true,ignoreBOM:preserveBom}).decode(bytes);
   };
-  const report = JSON.parse(analyze(read(input), options['--rules'] ? read(options['--rules']) : '{}'));
+  const report = JSON.parse(analyze(read(input, true), options['--rules'] ? read(options['--rules']) : '{}'));
   const json = JSON.stringify(report,null,2)+'\n';
   const save = (path,content) => {if(path){mkdirSync(dirname(resolve(path)),{recursive:true});writeFileSync(path,content);}};
   save(options['--json'],json);

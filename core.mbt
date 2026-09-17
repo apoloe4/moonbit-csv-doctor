@@ -2,8 +2,22 @@
 /// CSV records retain their physical start line, even when fields span lines.
 struct Record {
   cells : Array[String]
+  spans : Array[SourceSpan]
   line : Int
 } derive(Eq)
+
+///|
+/// Half-open source ranges include CSV quotes; offsets include a leading BOM.
+struct SourceSpan {
+  startUtf16 : Int
+  endUtf16 : Int
+  startByte : Int
+  endByte : Int
+  startLine : Int
+  startColumn : Int
+  endLine : Int
+  endColumn : Int
+} derive(Eq, ToJson)
 
 ///|
 pub(all) suberror DoctorError {
@@ -19,14 +33,25 @@ fn parse_csv(
   let chars = text.iter().to_array()
   let records : Array[Record] = []
   let mut cells : Array[String] = []
+  let mut spans : Array[SourceSpan] = []
   let field = StringBuilder()
   let mut i = if chars.length() > 0 && chars[0] == '\u{FEFF}' { 1 } else { 0 }
+  let mut u16 = i
+  let mut bytes = i * 3
+  let mut source_line = 1
+  let mut source_column = 1
+  let mut field_u16 = u16
+  let mut field_bytes = bytes
+  let mut field_line = 1
+  let mut field_column = 1
   let mut line = 1
   let mut start = 1
   // 0: unquoted, 1: quoted, 2: closed quote
   let mut state = 0
   let mut touched = false
   while i < chars.length() {
+    let before = i
+    let mut next_field = false
     let c = chars[i]
     if state == 1 {
       if c == '"' {
@@ -49,14 +74,37 @@ fn parse_csv(
         }
       }
     } else if c == delimiter {
+      spans.push({
+        startUtf16: field_u16,
+        endUtf16: u16,
+        startByte: field_bytes,
+        endByte: bytes,
+        startLine: field_line,
+        startColumn: field_column,
+        endLine: source_line,
+        endColumn: source_column,
+      })
+      next_field = true
       cells.push(field.to_string())
       field.reset()
       state = 0
       touched = true
     } else if c == '\r' || c == '\n' {
+      spans.push({
+        startUtf16: field_u16,
+        endUtf16: u16,
+        startByte: field_bytes,
+        endByte: bytes,
+        startLine: field_line,
+        startColumn: field_column,
+        endLine: source_line,
+        endColumn: source_column,
+      })
+      next_field = true
       cells.push(field.to_string())
-      records.push({ cells, line: start, })
+      records.push({ cells, spans, line: start, })
       cells = []
+      spans = []
       field.reset()
       state = 0
       touched = false
@@ -79,14 +127,56 @@ fn parse_csv(
       field.write_char(c)
       touched = true
     }
+    // Advance over every consumed scalar, including escaped quotes and CRLF.
+    for j = before; j <= i; j = j + 1 {
+      let cp = chars[j].to_int()
+      u16 = u16 + (if cp > 0xFFFF { 2 } else { 1 })
+      bytes = bytes +
+        (if cp <= 0x7F {
+          1
+        } else if cp <= 0x7FF {
+          2
+        } else if cp <= 0xFFFF {
+          3
+        } else {
+          4
+        })
+      if chars[j] == '\r' {
+        source_line = source_line + 1
+        source_column = 1
+      } else if chars[j] == '\n' {
+        if j == 0 || chars[j - 1] != '\r' {
+          source_line = source_line + 1
+        }
+        source_column = 1
+      } else {
+        source_column = source_column + 1
+      }
+    }
+    if next_field {
+      field_u16 = u16
+      field_bytes = bytes
+      field_line = source_line
+      field_column = source_column
+    }
     i = i + 1
   }
   if state == 1 {
     raise Invalid("第 \{start} 行：引号未闭合")
   }
   if touched || cells.length() > 0 {
+    spans.push({
+      startUtf16: field_u16,
+      endUtf16: u16,
+      startByte: field_bytes,
+      endByte: bytes,
+      startLine: field_line,
+      startColumn: field_column,
+      endLine: source_line,
+      endColumn: source_column,
+    })
     cells.push(field.to_string())
-    records.push({ cells, line: start, })
+    records.push({ cells, spans, line: start, })
   }
   records
 }
@@ -234,6 +324,7 @@ struct Issue {
   code : String
   value : String
   message : String
+  span : SourceSpan?
 } derive(ToJson)
 
 ///|
@@ -305,6 +396,7 @@ fn inspect_data(text : String, config : String) -> Json raise {
         row: ri,
         line: record.line,
         column: "",
+        span: None,
         code: "column_count",
         value: "",
         message: "应有 \{headers.length()} 列，实际 \{record.cells.length()} 列",
@@ -323,6 +415,11 @@ fn inspect_data(text : String, config : String) -> Json raise {
         issues.push({
           row: ri,
           line: record.line,
+          span: if ci < record.spans.length() {
+            Some(record.spans[ci])
+          } else {
+            None
+          },
           column: rule.column,
           code,
           value,

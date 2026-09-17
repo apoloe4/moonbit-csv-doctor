@@ -152,3 +152,26 @@ test "integer validation does not accept rounded decimals or underflow" {
     }
   }
 }
+
+///|
+test "source spans include quotes and bytes but exclude delimiter and newline" {
+  let records = parse_csv("\u{FEFF}id,n\r\n\"中😀\r\nx\",\"bad\"\r\n", ',')
+  let span = records[1].spans[1]
+  assert_eq(span.startLine, 3)
+  assert_eq(span.startColumn, 4)
+  assert_eq(span.endColumn, 9)
+  assert_eq(span.endByte - span.startByte, 5)
+  assert_eq(span.endUtf16 - span.startUtf16, 5)
+  assert_eq(records[0].spans[0].startByte, 3)
+  assert_eq(records[0].spans[0].startColumn, 1)
+}
+
+///|
+test "empty terminal fields have zero-width source spans" {
+  let records = parse_csv("a,b\n1,", ',')
+  let span = records[1].spans[1]
+  assert_eq(span.startByte, 6)
+  assert_eq(span.endByte, 6)
+  assert_eq(span.startLine, 2)
+  assert_eq(span.startColumn, 3)
+}
