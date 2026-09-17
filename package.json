@@ -7,8 +7,9 @@
   "engines": {"node": ">=22"},
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test tests/*.test.mjs web/*.test.mjs",
     "start": "node scripts/serve.mjs",
     "demo": "node cli.mjs examples/orders.csv --rules examples/rules.json --html reports/orders.html --json reports/orders.json"
   }
 }
+

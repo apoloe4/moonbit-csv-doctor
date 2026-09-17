@@ -26,6 +26,8 @@ node cli.mjs --help
 
 ## 规则
 
+浏览器可展开“用表单添加列规则”，填写列名、类型、必填、唯一性、范围和枚举后添加到 JSON。已有列规则不会被覆盖；修改后需重新体检。
+
 ```json
 {
   "delimiter": ",",
@@ -98,4 +100,5 @@ docs/PROJECT.md          参赛项目说明与演示流程
 ## License
 
 MIT。MoonBit 标准库及生成代码涉及的第三方许可见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
 
